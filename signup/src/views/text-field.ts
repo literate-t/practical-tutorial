@@ -1,7 +1,7 @@
 import { nextTick } from "../utils";
 import { ValidateRule } from "../types";
 import template from "./text-field.template";
-import { RequireRule } from "../constant";
+import { IsRequired } from "../constant";
 
 type Props = {
   id: string;
@@ -35,7 +35,7 @@ export default class TextField {
     this.data = { ...DefaultProps, ...data };
 
     if (this.data.require) {
-      this.addValidateRule(RequireRule);
+      this.addValidateRule(IsRequired);
     }
 
     nextTick(this.attachEventHandler);
@@ -45,7 +45,7 @@ export default class TextField {
     const target = this.data.text ? this.data.text.trim() : "";
 
     const invalidateRules = this.validateRules.filter(
-      (validateRule) => validateRule.rule.test(target) !== validateRule.match
+      (validateRule) => validateRule.rule.test(target) === validateRule.match
     );
 
     // 검증 정책 위반이 여러 개 걸렸다고 해도 하나만 보여주기
@@ -59,7 +59,7 @@ export default class TextField {
       return {
         ...this.data,
         updated: this.updated,
-        valid: !isInvalid,
+        valid: !isInvalid, // 객체를 not 연산하면 false가 나오고, null은 true가 된다
         validateMessage: !!isInvalid ? isInvalid.message : "",
       };
     } else {
@@ -93,11 +93,12 @@ export default class TextField {
       `#field-${this.data.id}`
     ) as HTMLElement;
     const docFrag = document.createElement("div");
-
     docFrag.innerHTML = this.template(this.buildData());
-    // attachEventHandler에서 추가한 핸들러를 안 날리기 위해
-    // 핸들러는 버블링이 일어나므로 상관 없지 않나..
+
+    // attachEventHandler에서 추가한 핸들러를 안 날리기 위해서라고 하는데 잘 이해가 안 됨
+    // 기존에 템플릿을 재활용하다 보니까 이렇게 안 하면 최상위 태그가 중복됨
     container.innerHTML = docFrag.children[0].innerHTML;
+    //container.innerHTML = this.template(this.buildData());
   };
 
   public get name(): string {
