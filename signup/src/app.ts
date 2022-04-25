@@ -98,7 +98,7 @@ export default class App {
 
     const submitData: AnyObject = this.fields
       .map((field) => ({ [field.name]: field.value }))
-      .reduce((a, b) => ({ ...a, ...b }), {});
+      //.reduce((a, b) => ({ ...a, ...b }), {});
 
     console.log(submitData);
   };
