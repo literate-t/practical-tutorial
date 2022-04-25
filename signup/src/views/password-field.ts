@@ -19,12 +19,13 @@ type Props = {
   strong?: StrongLevel;
 };
 
-// const StrongMessage: string[] = [
+//const StrongMessage: string[] = [
+// 배열과의 다른 점은 요소의 개수를 지정할 수 있다는 점
 const StrongMessage: [string, string, string, string] = [
   "금지된 수준",
   "심각한 수준",
   "보통 수준",
-  "강력한 암호",
+  "강력한 암호"
 ];
 
 const DefaultProps: Props = {
@@ -106,7 +107,7 @@ export default class PasswordField {
     const target = this.data.text ? this.data.text.trim() : "";
 
     const invalidateRules = this.validateRules.filter(
-      (validateRule) => validateRule.rule.test(target) !== validateRule.match
+      (validateRule) => validateRule.rule.test(target) === validateRule.match
     );
 
     return invalidateRules.length > 0 ? invalidateRules[0] : null;
