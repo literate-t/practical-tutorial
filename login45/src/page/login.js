@@ -36,30 +36,67 @@ export default class Login {
       .map(field => ({ [field.name]: field.value }))
       .reduce((a, b) => ({ ...a, ...b }), {});
 
-    axios.post('/api/authentication', loginData)
-      .then(result => {
-        return result.data.result;
-      })
-      .then(({ id, token }) => {
-        const options = { headers: { token } };
-        this.#data.store.token = token;
 
-        return axios.all([
-          axios.get(`/api/user/${id}`, options),
-          axios.get(`/api/user/${id}/posts`, options),
-        ]);
-      })
-      .then(([profile, posts]) => {
-        this.#data.store.userProfile = profile.data.result;
-        this.#data.store.userPosts = posts.data.results;
 
-        location.href = '/#/profile';
-      })
-      .catch(error => {      
+    this.#getData(loginData);
+    // axios.post('/api/authentication', loginData)
+    //   .then(result => {
+    //     return result.data.result;
+    //   })
+    //   .then(({ id, token }) => {
+    //     const options = { headers: { token } };
+    //     this.#data.store.token = token;
+
+    //     axios.all([
+    //       axios.get(`/api/user/${id}`, options),
+    //       axios.get(`/api/user/${id}/posts`, options),
+    //     ]).then(([profile, posts]) => {
+    //       this.#data.store.userProfile = profile.data.result;
+    //       this.#data.store.userPosts = posts.data.results;
+  
+    //       location.href = '/#/profile';
+    //     }).catch(error => {      
+    //       this.#loginFail = true;
+    //       this.render();
+    //     });
+    //   })
+    //   .catch(error => {      
+    //     this.#loginFail = true;
+    //     this.render();
+    //   });
+  }
+
+  #getAuth = async (loginData) => {
+    const result = await axios.post('/api/authentication', loginData);
+    return result.data.result;
+  }
+
+  #getIdAndPosts = async(options) => {
+    const result = await axios.all([
+      axios.get(`/api/user/${id}`, options),
+      axios.get(`/api/user/${id}/posts`, options),
+    ])
+    return result;
+  }
+
+ #getData = async (loginData) => {
+    try {
+      const {id, token} = this.#getAuth(loginData);
+
+      const options = { headers: { token } };
+      this.#data.store.token = token;
+
+      const [profile, posts] = this.#getIdAndPosts(options);
+
+      this.#data.store.userProfile = profile.data.result;
+      this.#data.store.userPosts = posts.data.results;
+
+      location.href = '/#/profile';
+    } catch(error) {
         this.#loginFail = true;
         this.render();
-      });
-  }
+    }
+ }
 
   render = () => {
     this.#container.innerHTML = this.#template({ ...this.#data, loginFail: this.#loginFail });
